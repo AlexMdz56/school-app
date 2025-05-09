@@ -5,17 +5,15 @@ import {
   BookOpen,
   Bot,
   Command,
-  Frame,
   LifeBuoy,
-  Map,
-  PieChart,
+  School,
   Send,
-  Settings2,
-  SquareTerminal,
+  Timer,
+  User,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
+// import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -27,6 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -36,86 +35,76 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
+      title: "Alumnos",
+      url: "/alumnos",
+      icon: User,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "Ver",
+          url: "/alumnos",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "Crear",
+          url: "/alumnos/nuevo-alumno",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "Mestros",
+      url: "/maestros",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
+          title: "Ver",
           url: "#",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
+          title: "Crear",
           url: "#",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
+      title: "Materias",
+      url: "/materias",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
+          title: "Ver",
           url: "#",
         },
         {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
+          title: "Crear",
           url: "#",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      title: "Salones",
+      url: "/salones",
+      icon: School,
       items: [
         {
-          title: "General",
+          title: "Ver",
           url: "#",
         },
         {
-          title: "Team",
+          title: "Crear",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Horarios",
+      url: "/horarios",
+      icon: Timer,
+      items: [
+        {
+          title: "Ver",
           url: "#",
         },
         {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
+          title: "Crear",
           url: "#",
         },
       ],
@@ -133,23 +122,23 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+  // projects: [
+  //   {
+  //     name: "Design Engineering",
+  //     url: "#",
+  //     icon: Frame,
+  //   },
+  //   {
+  //     name: "Sales & Marketing",
+  //     url: "#",
+  //     icon: PieChart,
+  //   },
+  //   {
+  //     name: "Travel",
+  //     url: "#",
+  //     icon: Map,
+  //   },
+  // ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -162,22 +151,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-medium">Mi Escuela</span>
+                  <span className="truncate text-xs">Sistema</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavProjects projects={data.projects} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
