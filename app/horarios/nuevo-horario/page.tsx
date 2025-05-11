@@ -3,58 +3,120 @@
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import React from "react";
-
-interface Schedules {
-    horario: string;
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function NuevoHorario() {
     const saveSchedule = useMutation(api.functions.schedule.saveSchedule);
     const router = useRouter();
+    const [formData, setFormData] = useState({
+        periodo: "",
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const periodos = [
+        "8:00 AM - 9:00 AM",
+        "9:00 AM - 10:00 AM",
+        "10:00 AM - 11:00 AM",
+        "11:00 AM - 12:00 PM",
+        "12:00 PM - 1:00 PM",
+        "1:00 PM - 2:00 PM"
+    ];
+
+    const handleSelectChange = (name: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
-        const formData = new FormData(e.currentTarget);
-        const data: Schedules = {
-            horario: formData.get('horario') as string,
+        try {
+            await saveSchedule(formData);
+            router.push("/horarios");
+        } catch (error) {
+            console.error("Error al crear horario:", error);
+        } finally {
+            setIsSubmitting(false);
         }
-
-        await saveSchedule(data);
-        router.back();
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col justify-center items-center px-4">
-            <div className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col">
-                <h2 className="text-xl font-semibold text-center">Nueva Materia</h2>
+        <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-2xl sm:text-3xl font-bold">
+                        Crear Nuevo Horario
+                    </h1>
+                </div>
             </div>
-            <form
-                className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col space-y-4"
-                onSubmit={handleSubmit}
-            >
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="horario" className="text-sm font-medium text-gray-100">
-                        Horario
-                    </label>
-                    <input
-                        type="text"
-                        name="horario"
-                        id="horario"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className="mt-6 flex justify-end gap-4 md:gap-2 md:mt-3 ">
-                    <button type="button" onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Regresar
-                    </button>
-                    <button type="submit" className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Guardar
-                    </button>
-                </div>
-            </form>
+
+            <Card className="w-full max-w-2xl mx-auto">
+                <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle className="font-semibold text-center">Información del Horario</CardTitle>
+                    </CardHeader>
+
+                    <CardContent className="grid grid-cols-1 gap-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="periodo">Periodo</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("periodo", value)}
+                                value={formData.periodo}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el periodo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {periodos.map((periodo) => (
+                                        <SelectItem key={periodo} value={periodo}>
+                                            {periodo}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !formData.periodo}
+                            className="w-full sm:w-auto"
+                        >
+                            {isSubmitting ? "Creando..." : "Crear Horario"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     );
 }

@@ -1,61 +1,35 @@
 "use client";
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import { TablaHorarios } from "./tabla-horarios";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export default function Horarios() {
-    const horarios = useQuery(api.functions.schedule.getSchedules);
     const router = useRouter();
-
-    const handleClick = (id: string) => router.push(`/horarios/${id}`);
-
-    if (horarios === undefined) {
-        return (
-            <div className="p-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">
-                    Cargando horarios...
-                </h1>
-            </div>);
-    };
 
     return (
         <div className="container mx-auto py-10">
-            <div className="flex justify-between items-center">
-                <button onClick={() => router.push('/')} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Regresar al inicio
-                </button>
-                <button onClick={() => router.push("/horarios/nuevo-horario")} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Nuevo Horario
-                </button>
+            <h1 className="text-3xl font-bold mb-6">Sistema de Horarios</h1>
+            <p className="text-muted-foreground mb-6">
+                Haz clic en cualquier horario para ver sus detalles completos,
+                editarlo o eliminarlo. Para crear un nuevo horario, usa el botón
+                Nuevo Horario.
+            </p>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold">Lista de Horarios</h2>
+                <div className="flex gap-2">
+                    <Button onClick={() => router.push('/')} className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Regresar al inicio
+                    </Button>
+                    <Button onClick={() => router.push("/horarios/nuevo-horario")} className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Nuevo Horario
+                    </Button>
+                </div>
             </div>
-            <Table>
-                <TableCaption>Lista de Estudiantes Registrados</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="text-center" >Horario</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {horarios?.length === 0 ? (
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-center">
-                                No hay horarios registrados
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        horarios?.map(horario => (
-                            <TableRow
-                                key={horario._id}
-                                onClick={() => handleClick(horario._id)}
-                                className="cursor-pointer hover:bg-muted">
-                                <TableCell>{horario.horario}</TableCell>
-                            </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
+            <TablaHorarios />
         </div>
     );
 }

@@ -1,63 +1,35 @@
 "use client";
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
+import TablaMaterias from "./tabla-materias";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export default function Materias() {
-    const materias = useQuery(api.functions.subject.getSubjects);
     const router = useRouter();
-
-    const handleClick = (id: string) => router.push(`/materias/${id}`);
-
-    if (materias === undefined) {
-        return (
-            <div className="p-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">
-                    Cargando materias...
-                </h1>
-            </div>);
-    };
 
     return (
         <div className="container mx-auto py-10">
-            <div className="flex justify-between items-center">
-                <button onClick={() => router.push('/')} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Regresar al inicio
-                </button>
-                <button onClick={() => router.push("/materias/nueva-materia")} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Nueva Materia
-                </button>
+            <h1 className="text-3xl font-bold mb-6">Sistema de Materias</h1>
+            <p className="text-muted-foreground mb-6">
+                Haz clic en cualquier materia para ver sus detalles completos,
+                editarla o eliminarla. Para crear una nueva materia, usa el botón
+                Nueva Materia.
+            </p>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold">Lista de Materias</h2>
+                <div className="flex gap-2">
+                    <Button onClick={() => router.push('/')} className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Regresar al inicio
+                    </Button>
+                    <Button onClick={() => router.push("/materias/nueva-materia")} className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Nueva Materia
+                    </Button>
+                </div>
             </div>
-            <Table>
-                <TableCaption>Lista de Estudiantes Registrados</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="text-center" >Identificador</TableHead>
-                        <TableHead className="text-center" >Materia</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {materias?.length === 0 ? (
-                        <TableRow>
-                            <TableCell colSpan={3} className="text-center">
-                                No hay materias registradas
-                            </TableCell>
-                        </TableRow>
-                    ) : (
-                        materias?.map(materia => (
-                            <TableRow
-                                key={materia._id}
-                                onClick={() => handleClick(materia.identificador)}
-                                className="cursor-pointer hover:bg-muted">
-                                <TableCell>{materia.identificador}</TableCell>
-                                <TableCell>{materia.materia}</TableCell>
-                            </TableRow>
-                        ))
-                    )}
-                </TableBody>
-            </Table>
+            <TablaMaterias />
         </div>
     );
 }

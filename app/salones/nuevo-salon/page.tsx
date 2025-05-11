@@ -3,87 +3,148 @@
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import React from "react";
-
-interface Classroom {
-    numero: number;
-    edificio: string;
-    planta: string;
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function NuevoSalon() {
     const saveClassroom = useMutation(api.functions.classroom.saveClassroom);
     const router = useRouter();
 
+    const [formData, setFormData] = useState({
+        numero: '',
+        edificio: '',
+        planta: '',
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSelectChange = (name: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const formData = new FormData(e.currentTarget);
-        const data: Classroom = {
-            numero: Number(formData.get('numero')),
-            edificio: formData.get('edificio') as string,
-            planta: formData.get('planta') as string,
+        try {
+            await saveClassroom(formData);
+            router.push('/salones');
+        } catch (error) {
+            console.error("Error al crear salón:", error);
+        } finally {
+            setIsSubmitting(false);
         }
-
-        await saveClassroom(data);
-        router.back();
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col justify-center items-center px-4">
-            <div className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col">
-                <h2 className="text-xl font-semibold text-center">Nuevo Salón</h2>
+        <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-2xl sm:text-3xl font-bold">
+                        Crear Nuevo Salón
+                    </h1>
+                </div>
             </div>
-            <form
-                className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col space-y-4"
-                onSubmit={handleSubmit}
-            >
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="numero" className="text-sm font-medium text-gray-100">
-                        Número
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        name="numero"
-                        id="numero"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="edificio" className="text-sm font-medium text-gray-100">
-                        Edificio
-                    </label>
-                    <input
-                        type="text"
-                        name="edificio"
-                        id="edificio"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="planta" className="text-sm font-medium text-gray-100">
-                        Planta
-                    </label>
-                    <input
-                        type="text"
-                        name="planta"
-                        id="planta"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className="mt-6 flex justify-end gap-4 md:gap-2 md:mt-3 ">
-                    <button type="button" onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Regresar
-                    </button>
-                    <button type="submit" className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Guardar
-                    </button>
-                </div>
-            </form>
+
+            <Card className="w-full max-w-2xl mx-auto">
+                <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle className="font-semibold text-center">Información del Salón</CardTitle>
+                    </CardHeader>
+
+                    <CardContent className="grid grid-cols-1 gap-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="numero">Número del Salón</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("numero", value)}
+                                value={formData.numero}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el número de salón" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                                        <SelectItem key={num} value={num.toString()}>
+                                            {num}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="edificio">Edificio</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("edificio", value)}
+                                value={formData.edificio}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el edificio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {["A", "B", "C", "D"].map((edificio) => (
+                                        <SelectItem key={edificio} value={edificio}>
+                                            Edificio {edificio}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="planta">Planta</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("planta", value)}
+                                value={formData.planta}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona la planta" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Alta">Planta Alta</SelectItem>
+                                    <SelectItem value="Baja">Planta Baja</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !formData.numero || !formData.edificio || !formData.planta}
+                            className="w-full sm:w-auto"
+                        >
+                            {isSubmitting ? "Creando..." : "Crear Salón"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     );
 }

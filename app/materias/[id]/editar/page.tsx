@@ -3,7 +3,13 @@
 import { api } from "@/convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui//button";
+import { Input } from "@/components/ui//input";
+import { Label } from "@/components/ui//label";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui//card";
+import { ArrowLeft, Save } from "lucide-react";
+import { Skeleton } from "@/components/ui//skeleton";
 
 export default function EditarMateria() {
     const params = useParams();
@@ -12,6 +18,7 @@ export default function EditarMateria() {
     const updateSubject = useMutation(api.functions.subject.updateSubject);
     const router = useRouter();
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formState, setFormState] = useState({
         identificador: "",
         materia: "",
@@ -26,64 +33,131 @@ export default function EditarMateria() {
         }
     }, [materia]);
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const { name, value } = e.target;
+        setFormState((prev) => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
-        await updateSubject({
-            id: materia!._id,
-            identificador: formState.identificador,
-            materia: formState.materia,
-        });
+        if (!materia) return;
+        try {
+            await updateSubject({
+                id: materia._id,
+                ...formState,
+            });
+            router.push(`/materias/${id}`);
+        } catch (error) {
+            console.error("Error al actualizar materia:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
-        router.back();
+    if (materia === undefined) {
+        return (
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <Skeleton className="h-8 w-64" />
+                </div>
+                <Card className="max-w-2xl mx-auto">
+                    <CardHeader>
+                        <Skeleton className="h-8 w-full mb-2" />
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                    <CardFooter>
+                        <Skeleton className="h-10 w-24 mr-2" />
+                        <Skeleton className="h-10 w-24" />
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!materia) {
+        return (
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-3xl font-bold">Materia no encontrada</h1>
+                </div>
+                <p>No se pudo encontrar la Materia con el ID proporcionado.</p>
+            </div>
+        );
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col justify-center items-center px-4">
-            <div className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col">
-                <h2 className="text-xl font-semibold text-center">Nueva Materia</h2>
+        <div className="container mx-auto py-10">
+            <div className="flex flex-col items-center gap-2 mb-6">
+                <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <h1 className="text-3xl font-bold">Editar materia</h1>
             </div>
-            <form
-                className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col space-y-4"
-                onSubmit={handleSubmit}
-            >
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="identificador" className="text-sm font-medium text-gray-100">
-                        Identificador
-                    </label>
-                    <input
-                        type="text"
-                        value={formState.identificador}
-                        onChange={e => setFormState({ ...formState, identificador: e.target.value })}
-                        name="identificador"
-                        id="identificador"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="materia" className="text-sm font-medium text-gray-100">
-                        Materia
-                    </label>
-                    <input
-                        type="text"
-                        value={formState.materia}
-                        onChange={e => setFormState({ ...formState, materia: e.target.value })}
-                        name="materia"
-                        id="materia"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className="mt-6 flex justify-end gap-4 md:gap-2 md:mt-3 ">
-                    <button type="button" onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Regresar
-                    </button>
-                    <button type="submit" className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Guardar
-                    </button>
-                </div>
-            </form>
+
+            <Card className="max-w-2xl mx-auto">
+                <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle className="font-semibold text-center">Modificar información de {materia.materia}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="numMatricula">Identificador</Label>
+                            <Input
+                                id="indentificador"
+                                name="identificador"
+                                value={formState.identificador}
+                                onChange={handleChange}
+                                placeholder="Ej: BIO, MAT, FIS"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="nombreMateria">Nombre de la Materia</Label>
+                            <Input
+                                id="nombreMateria"
+                                name="nombreMateria"
+                                value={formState.materia}
+                                onChange={handleChange}
+                                placeholder="Nombre de la materia"
+                                required
+                            />
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex justify-between">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="flex items-center gap-2 mt-8"
+                        >
+                            <Save className="h-4 w-4" />
+                            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     );
 }

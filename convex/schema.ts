@@ -17,11 +17,11 @@ export default defineSchema({
         materia: v.string(),
     }),
     classrooms: defineTable({
-        numero: v.number(),
+        numero: v.string(),
         edificio: v.string(),
         planta: v.string(),
     }),
     schedules: defineTable({
-        horario: v.string(),
+        periodo: v.string(),
     }),
 });

@@ -4,7 +4,7 @@ import { mutation, query } from "../_generated/server";
 // Create
 export const saveSchedule = mutation({
     args: {
-        horario: v.string(),
+        periodo: v.string(),
     },
     handler: async (ctx, args) => {
         await ctx.db.insert("schedules", {
@@ -35,7 +35,7 @@ export const getSchedule = query({
 export const updateSchedule = mutation({
     args: {
         id: v.id("schedules"),
-        horario: v.string(),
+        periodo: v.string(),
     },
     handler: async (ctx, args) => {
         const { id, ...data } = args;

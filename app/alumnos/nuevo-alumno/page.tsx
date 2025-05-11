@@ -25,7 +25,6 @@ export default function NuevoAlumno() {
         nombre: "",
         correo: "",
     });
-
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +35,6 @@ export default function NuevoAlumno() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         setIsSubmitting(true);
 
         try {

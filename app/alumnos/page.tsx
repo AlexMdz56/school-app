@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import TablaAlumnos from "./tabla-alumnos";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Plus } from "lucide-react";
 
 export default function Alumnos() {
     const router = useRouter();
-
 
     return (
         <div className="container mx-auto py-10">
@@ -15,13 +16,18 @@ export default function Alumnos() {
                 editarlo o eliminarlo. Para crear un nuevo estudiante, usa el botón
                 Nuevo Alumno.
             </p>
-            <div className="flex justify-between items-center">
-                <button onClick={() => router.push('/')} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Regresar al inicio
-                </button>
-                <button onClick={() => router.push("/alumnos/nuevo-alumno")} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Nuevo Alumno
-                </button>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold">Lista de Alumnos</h2>
+                <div className="flex gap-2">
+                    <Button onClick={() => router.push('/')} className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Regresar al inicio
+                    </Button>
+                    <Button onClick={() => router.push("/alumnos/nuevo-alumno")} className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Nuevo Alumno
+                    </Button>
+                </div>
             </div>
             <TablaAlumnos />
         </div>

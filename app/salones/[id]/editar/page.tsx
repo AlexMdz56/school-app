@@ -5,6 +5,18 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Save } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 export default function EditarMateria() {
     const params = useParams();
@@ -13,96 +25,176 @@ export default function EditarMateria() {
     const updateClassroom = useMutation(api.functions.classroom.updateClassroom);
     const router = useRouter();
 
-    const [formState, setFormState] = useState({
-        numero: 0,
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState({
+        numero: "",
         edificio: "",
-        planta: "",
+        planta: ""
     });
 
     useEffect(() => {
         if (salon) {
-            setFormState({
+            setFormData({
                 numero: salon.numero,
                 edificio: salon.edificio,
-                planta: salon.planta,
+                planta: salon.planta
             });
         }
     }, [salon]);
 
+    const handleSelectChange = (name: string, value: string) => {
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        if (!salon) return;
 
-        await updateClassroom({
-            id: salon!._id,
-            numero: formState.numero,
-            edificio: formState.edificio,
-            planta: formState.planta,
-        });
+        try {
+            await updateClassroom({
+                id: salon._id,
+                ...formData,
+            });
+            router.push(`/salones/${id}`);
+        } catch (error) {
+            console.error("Error al actualizar salón:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
-        router.back();
+    if (salon === undefined) {
+        return (
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <Skeleton className="h-8 w-64" />
+                </div>
+                <Card className="max-w-2xl mx-auto">
+                    <CardHeader>
+                        <Skeleton className="h-8 w-full mb-2" />
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                    <CardFooter>
+                        <Skeleton className="h-10 w-24 mr-2" />
+                        <Skeleton className="h-10 w-24" />
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!salon) {
+        return (
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-3xl font-bold">Salón no encontrado</h1>
+                </div>
+                <p>No se pudo encontrar el Salón con el ID proporcionado.</p>
+            </div>
+        );
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col justify-center items-center px-4">
-            <div className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col">
-                <h2 className="text-xl font-semibold text-center">Nueva Materia</h2>
+        <div className="container mx-auto py-10">
+            <div className="flex flex-col items-center gap-2 mb-6">
+                <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <h1 className="text-3xl font-bold">Editar Salón</h1>
             </div>
-            <form
-                className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col space-y-4"
-                onSubmit={handleSubmit}
-            >
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="numero" className="text-sm font-medium text-gray-100">
-                        Número
-                    </label>
-                    <input
-                        type="number"
-                        min="1"
-                        value={formState.numero}
-                        onChange={e => setFormState({ ...formState, numero: Number(e.target.value) })}
-                        name="numero"
-                        id="numero"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="edificio" className="text-sm font-medium text-gray-100">
-                        Edificio
-                    </label>
-                    <input
-                        type="text"
-                        value={formState.edificio}
-                        onChange={e => setFormState({ ...formState, edificio: e.target.value })}
-                        name="edificio"
-                        id="edificio"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="planta" className="text-sm font-medium text-gray-100">
-                        Planta
-                    </label>
-                    <input
-                        type="text"
-                        value={formState.planta}
-                        onChange={e => setFormState({ ...formState, planta: e.target.value })}
-                        name="planta"
-                        id="planta"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className="mt-6 flex justify-end gap-4 md:gap-2 md:mt-3 ">
-                    <button type="button" onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Regresar
-                    </button>
-                    <button type="submit" className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Guardar
-                    </button>
-                </div>
-            </form>
+
+            <Card className="max-w-2xl mx-auto">
+                <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle className="font-semibold text-center">Modificar información del Salón {salon.numero}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="numero">Número de Salón</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("numero", value)}
+                                value={formData.numero}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el número de salón" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[1, 2, 3, 4, 5, 6, 7].map((num) => (
+                                        <SelectItem key={num} value={num.toString()}>
+                                            {num}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="edificio">Edificio</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("edificio", value)}
+                                value={formData.edificio}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el edificio" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {["A", "B", "C", "D"].map((edificio) => (
+                                        <SelectItem key={edificio} value={edificio}>
+                                            Edificio {edificio}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="planta">Planta</Label>
+                            <Select
+                                onValueChange={(value) => handleSelectChange("planta", value)}
+                                value={formData.planta}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona la planta" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Planta Alta">Planta Alta</SelectItem>
+                                    <SelectItem value="Planta Baja">Planta Baja</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex justify-between">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting || !formData.numero || !formData.edificio || !formData.planta}
+                            className="flex items-center gap-2"
+                        >
+                            <Save className="h-4 w-4" />
+                            {isSubmitting ? "Guardando..." : "Guardar Cambios"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     );
 }

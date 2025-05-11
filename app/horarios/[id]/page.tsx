@@ -4,99 +4,159 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Horario() {
     const params = useParams();
     const id = params.id as Id<"schedules">;
     const router = useRouter();
-
     const horario = useQuery(api.functions.schedule.getSchedule, { id });
     const deleteSchedule = useMutation(api.functions.schedule.deleteSchedule);
 
-    const [showModal, setShowModal] = useState(false);
-    const modalRef = useRef<HTMLDivElement>(null);
+    const [modalEliminar, setModalEliminar] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleDelete = async () => {
+        setIsSubmitting(true);
         if (!horario?._id) return;
-        await deleteSchedule({ id: horario._id });
-        setShowModal(false);
-        router.back();
+        try {
+            await deleteSchedule({ id: horario._id });
+            router.push("/horarios");
+        } catch (error) {
+            console.error("Error al eliminar horario:", error);
+        } finally {
+            setIsSubmitting(false);
+            setModalEliminar(false);
+        }
     };
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(e.target as Node)) setShowModal(false);
-        };
-
-        if (showModal) document.addEventListener("mousedown", handleClickOutside);
-
-        return () => document.addEventListener("mousedown", handleClickOutside);
-    }, [showModal]);
 
     if (horario === undefined) {
         return (
-            <div className="p-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">
-                    Cargando horario...
-                </h1>
-            </div>);
-    };
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <Skeleton className="h-8 w-64" />
+                </div>
+                <Card className="max-w-2xl mx-auto">
+                    <CardHeader>
+                        <Skeleton className="h-8 w-full mb-2" />
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                    <CardFooter>
+                        <Skeleton className="h-10 w-24 mr-2" />
+                        <Skeleton className="h-10 w-24" />
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
 
-    if (horario === null) {
+    if (!horario) {
         return (
-            <div className="p-6 text-center">
-                <h1 className="text-2xl font-bold mb-2">Horario no encontrado</h1>
-                <p>No se encontró ninguna horario con el identificador proporcionado.</p>
-            </div>);
-    };
+            <div className="container mx-auto py-10">
+                <div className="flex items-center gap-2 mb-6">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-3xl font-bold">Horario no encontrado</h1>
+                </div>
+                <p>No se pudo encontrar el horario con el ID proporcionado.</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex flex-1 min-h-[calc(100vh-5rem)] flex-col items-center justify-center">
-            <div className="p-10 m-10">
-                <h1 className="text-5xl font-bold mb-4">
-                    Horario
-                </h1>
-                <ul className="space-y-2">
-                    <li>
-                        <strong>Identificador:</strong> {horario.horario}
-                    </li>
-                </ul>
+        <div className="container mx-auto py-10">
+            <div className="flex flex-col items-center gap-2 mb-6">
+                <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <h1 className="text-3xl font-bold">Detalle del Horario</h1>
             </div>
-            <div className="flex justify-between ">
-                <button onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10" >
-                    Volver a la lista
-                </button>
-                <button onClick={() => router.push(`${horario._id}/editar`)} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition m-10 p-10">
-                    Editar
-                </button>
-                <button onClick={() => setShowModal(true)} className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-900 transition m-10 p-10">
-                    Eliminar
-                </button>
-            </div>
-            {showModal && (
-                <div className="fixed inset-0 bg-black/30 backdrop-blur flex items-center justify-center z-50">
-                    <div ref={modalRef} className="bg-white rounded-xl p-6 max-w-sm w-full shadow-lg text-center">
-                        <h2 className="text-lg font-semibold mb-4 text-black">
-                            ¿Estás seguro de que deseas eliminar el horario?
-                        </h2>
-                        <div className="flex justify-center gap-4">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition"
+
+            <Card className="max-w-2xl mx-auto">
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <CardTitle className="text-2xl">
+                            Horario
+                        </CardTitle>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => router.push(`/horarios/${id}/editar`)}
                             >
-                                Cerrar
-                            </button>
-                            <button
-                                onClick={handleDelete}
-                                className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-900 transition"
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setModalEliminar(true)}
+                                className="text-destructive"
                             >
-                                Eliminar
-                            </button>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
-                </div>
-            )}
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Periodo</h3>
+                        <div className="p-2 bg-muted rounded-md">{horario.periodo}</div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Modal de confirmación para eliminar */}
+            <Dialog open={modalEliminar} onOpenChange={setModalEliminar}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>¿Estás completamente seguro?</DialogTitle>
+                        <DialogDescription>
+                            Esta acción no se puede deshacer. El horario será eliminado permanentemente
+                            de la base de datos.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setModalEliminar(false)}
+                            disabled={isSubmitting}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Eliminando..." : "Eliminar"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

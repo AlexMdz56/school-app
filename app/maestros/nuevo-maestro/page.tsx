@@ -3,86 +3,130 @@
 import { api } from "@/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import React from "react";
-
-interface Teacher {
-    numEmpleado: string;
-    nombre: string;
-    correo: string;
-}
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { ArrowLeft } from "lucide-react";
 
 export default function NuevoMaestro() {
     const saveTeacher = useMutation(api.functions.teacher.saveTeacher);
     const router = useRouter();
 
+    const [formData, setFormData] = useState({
+        numEmpleado: '',
+        nombre: '',
+        correo: '',
+    });
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
-        const formData = new FormData(e.currentTarget);
-        const data: Teacher = {
-            numEmpleado: formData.get('numEmpleado') as string,
-            nombre: formData.get('nombre') as string,
-            correo: formData.get('correo') as string,
+        try {
+            await saveTeacher(formData);
+            router.push('/maestros');
+        } catch (error) {
+            console.error("Error al crear maestro:", error);
+        } finally {
+            setIsSubmitting(false);
         }
 
-        await saveTeacher(data);
-        router.back();
     }
 
     return (
-        <div className="w-full min-h-screen flex flex-col justify-center items-center px-4">
-            <div className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col">
-                <h2 className="text-xl font-semibold text-center">Nuevo Maestro</h2>
+        <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
+            <div className="flex flex-col items-center sm:justify-between gap-4 mb-8">
+                <div className="flex flex-col items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <h1 className="text-2xl sm:text-3xl font-bold">
+                        Crear Nuevo Maestro
+                    </h1>
+                </div>
             </div>
-            <form
-                className="w-full max-w-md mx-auto p-4 overflow-y-auto h-full md:h-auto flex flex-col space-y-4"
-                onSubmit={handleSubmit}
-            >
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="numEmpleado" className="text-sm font-medium text-gray-100">
-                        Número de Empleado
-                    </label>
-                    <input
-                        type="text"
-                        name="numEmpleado"
-                        id="numEmpleado"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="nombre" className="text-sm font-medium text-gray-100">
-                        Nombre
-                    </label>
-                    <input
-                        type="text"
-                        name="nombre"
-                        id="nombre"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className={"flex flex-col mt-1"}>
-                    <label htmlFor="correo" className="text-sm font-medium text-gray-100">
-                        Correo
-                    </label>
-                    <input
-                        type="text"
-                        name="correo"
-                        id="correo"
-                        className="mt-1 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700"
-                        required
-                    />
-                </div>
-                <div className="mt-6 flex justify-end gap-4 md:gap-2 md:mt-3 ">
-                    <button type="button" onClick={() => router.back()} className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Regresar
-                    </button>
-                    <button type="submit" className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition">
-                        Guardar
-                    </button>
-                </div>
-            </form>
+
+            <Card className="w-full max-w-2xl mx-auto">
+                <form onSubmit={handleSubmit}>
+                    <CardHeader>
+                        <CardTitle className="font-semibold text-center">Información del Maestro</CardTitle>
+                    </CardHeader>
+
+                    <CardContent className="grid grid-cols-1 gap-6">
+                        <div className="grid gap-2">
+                            <Label htmlFor="numEmpleado">Número de Empleado</Label>
+                            <Input
+                                id="numEmpleado"
+                                name="numEmpleado"
+                                value={formData.numEmpleado}
+                                onChange={handleChange}
+                                placeholder="Ej: M12345"
+                                required
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="nombre">Nombre Completo</Label>
+                            <Input
+                                id="nombre"
+                                name="nombre"
+                                value={formData.nombre}
+                                onChange={handleChange}
+                                placeholder="Nombre del masetro"
+                                required
+                            />
+                        </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="correo">Correo Electrónico</Label>
+                            <Input
+                                id="correo"
+                                name="correo"
+                                type="email"
+                                value={formData.correo}
+                                onChange={handleChange}
+                                placeholder="correo@ejemplo.com"
+                                required
+                            />
+                        </div>
+                    </CardContent>
+
+                    <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => router.back()}
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full sm:w-auto"
+                        >
+                            {isSubmitting ? "Creando..." : "Crear Maestro"}
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
     )
 }

@@ -4,7 +4,7 @@ import { mutation, query } from "../_generated/server";
 // Create
 export const saveClassroom = mutation({
     args: {
-        numero: v.number(),
+        numero: v.string(),
         edificio: v.string(),
         planta: v.string(),
     },
@@ -37,7 +37,7 @@ export const getClassroom = query({
 export const updateClassroom = mutation({
     args: {
         id: v.id("classrooms"),
-        numero: v.number(),
+        numero: v.string(),
         edificio: v.string(),
         planta: v.string(),
     },
