@@ -1,11 +1,11 @@
-// app/(auth)/handle-magic-link/page.tsx
-"use client";
+'use client';
 
+import { Suspense } from 'react';
 import { useSignIn } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-export default function HandleMagicLinkPage() {
+function MagicLinkHandlerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signIn } = useSignIn();
@@ -22,10 +22,8 @@ export default function HandleMagicLinkPage() {
         });
 
         if (result.status === "needs_new_password") {
-          // Redirigir a página de cambio de contraseña
           router.push("/reset-password?from_magic_link=true");
         } else if (result.status === "complete") {
-          // Redirigir al dashboard
           router.push("/");
         }
       } catch (error) {
@@ -41,5 +39,16 @@ export default function HandleMagicLinkPage() {
     <div className="flex justify-center items-center min-h-screen">
       <span className="sr-only">Procesando enlace mágico...</span>
     </div>
+  );
+}
+
+export default function HandleMagicLinkPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+      </div>
+    }>
+      <MagicLinkHandlerContent />
+    </Suspense>
   );
 }
