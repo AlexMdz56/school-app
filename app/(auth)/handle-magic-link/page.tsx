@@ -22,7 +22,7 @@ function MagicLinkHandlerContent() {
         });
 
         if (result.status === "needs_new_password") {
-          router.push("/reset-password?from_magic_link=true");
+          router.push("/reset-password?from_magic_link=true&email=" + encodeURIComponent(result.identifier || ""));
         } else if (result.status === "complete") {
           router.push("/");
         }
@@ -37,7 +37,7 @@ function MagicLinkHandlerContent() {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <span className="sr-only">Procesando enlace mágico...</span>
+      <p>Procesando enlace mágico...</p>
     </div>
   );
 }
@@ -46,6 +46,7 @@ export default function HandleMagicLinkPage() {
   return (
     <Suspense fallback={
       <div className="flex justify-center items-center min-h-screen">
+        <p>Cargando...</p>
       </div>
     }>
       <MagicLinkHandlerContent />

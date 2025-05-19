@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { Suspense } from 'react';
 import { useSignIn } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const { signIn, isLoaded } = useSignIn();
   const [newPassword, setNewPassword] = useState("");
@@ -193,5 +194,17 @@ export default function ResetPasswordPage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="w-full min-h-screen flex justify-center items-center px-4">
+        <p>Cargando formulario de cambio de contraseña...</p>
+      </div>
+    }>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
