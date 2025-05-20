@@ -6,7 +6,7 @@ export default async function Home() {
     { name: "Salones", href: "/salones" },
     { name: "Horarios", href: "/horarios" },
     { name: "Calificaciones", href: "/calificaciones" },
-    { name: "Nuevo Usuario", href: "/user/create-user" },
+    { name: "Usuarios", href: "/users" },
   ];
 
   return (

@@ -19,7 +19,6 @@ export default function TablaAlumnos() {
     const alumnos = useQuery(api.functions.student.getStudents);
     const router = useRouter();
 
-
     const [alumnoActivo, setAlumnoActivo] = useState<string | null>(null);
     const [calificaciones, setCalificaciones] = useState<Grade[] | null>(null);
     const [loading, setLoading] = useState(false);
@@ -83,7 +82,7 @@ export default function TablaAlumnos() {
                                         onClick={() => setAlumnoActivo(alumno.id)}
                                         variant="outline"
                                         size="icon"
-                                        className="hover:bg-muted"
+                                        className="hover:bg-muted cursor-pointer"
                                     >
                                         <FileText className="h-4 w-4" />
                                     </Button>
@@ -95,7 +94,7 @@ export default function TablaAlumnos() {
                                     <Button
                                         onClick={() => handleClick(alumno.matricula)}
                                         variant="outline"
-                                        className="hover:bg-muted"
+                                        className="hover:bg-muted cursor-pointer"
                                     >
                                         <User className="h-4 w-4" />
                                         <Pencil className="h-4 w-4" />

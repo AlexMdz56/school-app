@@ -26,7 +26,7 @@ export const getStudents = query({
             nombre: student.nombre,
             correo: student.correo,
         }));
-    }
+    },
 });
 
 // Read -> uno

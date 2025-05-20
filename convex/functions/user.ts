@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "../_generated/server";
+import { mutation, query } from "../_generated/server";
 
 export const saveUser = mutation({
   args: {
@@ -27,5 +27,42 @@ export const saveUser = mutation({
     });
 
     return { userId };
+  },
+});
+
+export const getAllUsers = query({
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+
+    return users.map((user) => ({
+      id: user._id,
+      clerkUserId: user.clerkUserId,
+      nombre: user.nombre,
+      correo: user.correo,
+      rol: user.rol,
+    }));
+  },
+});
+
+export const getUserByClerkId = query({
+  args: { clerkUserId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .filter(q => q.eq(q.field('clerkUserId'), args.clerkUserId))
+      .first();
+  }
+});
+
+export const updateUser = mutation({
+  args: {
+    id: v.id("users"),
+    nombre: v.string(),
+    correo: v.string(),
+    rol: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...data } = args;
+    await ctx.db.patch(id, data);
   },
 });

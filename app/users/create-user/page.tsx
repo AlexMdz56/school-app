@@ -22,7 +22,7 @@ export default function CreateUserPage() {
         setLoading(true);
 
         try {
-            const res = await fetch("/api/create-user", {
+            const res = await fetch("/api/users", {
                 method: "POST",
                 body: JSON.stringify({ nombre: name, correo: email, rol }),
                 headers: { "Content-Type": "application/json" },

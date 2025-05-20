@@ -76,7 +76,7 @@ export default function Alumno() {
         );
     }
 
-   return (
+    return (
         <div className="container mx-auto py-10">
             <div className="flex flex-col items-center gap-2 mb-6">
                 <Button variant="outline" size="icon" onClick={() => router.back()}>
