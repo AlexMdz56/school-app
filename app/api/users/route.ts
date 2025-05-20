@@ -209,35 +209,33 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const email = searchParams.get("email");
-
-  if (!email) {
-    return NextResponse.json({ error: "Email es requerido" }, { status: 400 });
-  }
-
   try {
-    // Buscar usuario por email
-    const { data: users } = await clerk.users.getUserList({ emailAddress: [email] });
+    const { clerkUserId, convexUserId } = await request.json();
 
-    if (!users.length) {
-      return NextResponse.json({
-        message: `No se encontró usuario con el correo ${email}`,
-      }, { status: 404 });
+    // 1. Eliminar usuario en Clerk
+    await clerk.users.deleteUser(clerkUserId);
+
+    // 2. Eliminar usuario en Convex
+    await fetchMutation(api.functions.user.deleteUser, {
+      id: convexUserId,
+    });
+
+    return NextResponse.json({ success: true, message: "Usuario eliminado correctamente" });
+  } catch (error: unknown) {
+    console.error("Error eliminando usuario:", error);
+
+    let errorMessage = "Error desconocido";
+    const status = 500;
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message?: unknown }).message === "string"
+    ) {
+      errorMessage = (error as { message: string }).message;
     }
 
-    const userId = users[0].id;
-
-    // Eliminar usuario
-    await clerk.users.deleteUser(userId);
-
-    return NextResponse.json({
-      message: `Usuario ${email} eliminado con éxito.`,
-    });
-  } catch (error) {
-    console.error("Error eliminando usuario:", error);
-    return NextResponse.json({
-      error: "Error al eliminar usuario",
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: errorMessage }, { status });
   }
 }

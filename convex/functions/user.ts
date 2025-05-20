@@ -66,3 +66,10 @@ export const updateUser = mutation({
     await ctx.db.patch(id, data);
   },
 });
+
+export const deleteUser = mutation({
+  args: { id: v.id("users") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});

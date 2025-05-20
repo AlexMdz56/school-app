@@ -2,12 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { api } from '@/convex/_generated/api';
 import { useQuery } from 'convex/react';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import React from 'react'
+import React, { useState } from 'react'
 
 export default function User() {
   const params = useParams();
@@ -15,6 +16,32 @@ export default function User() {
   const router = useRouter();
 
   const user = useQuery(api.functions.user.getUserByClerkId, { clerkUserId: id });
+
+  const [modalEliminar, setModalEliminar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleDelete = async () => {
+    setIsSubmitting(true);
+    if (!user?._id) return;
+    try {
+      await fetch('/api/users', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clerkUserId: user.clerkUserId,
+          convexUserId: user._id,
+        }),
+      });
+      router.push("/users");
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+    } finally {
+      setIsSubmitting(false);
+      setModalEliminar(false);
+    }
+  };
 
   if (user === undefined) {
     return (
@@ -83,7 +110,7 @@ export default function User() {
               <Button
                 variant="outline"
                 size="icon"
-                // onClick={() => setModalEliminar(true)}
+                onClick={() => setModalEliminar(true)}
                 className="text-destructive"
               >
                 <Trash2 className="h-4 w-4" />
@@ -108,6 +135,35 @@ export default function User() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de confirmación para eliminar */}
+      <Dialog open={modalEliminar} onOpenChange={setModalEliminar}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Estás completamente seguro?</DialogTitle>
+            <DialogDescription>
+              Esta acción no se puede deshacer. El usuario será eliminado permanentemente
+              de la base de datos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setModalEliminar(false)}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Eliminando..." : "Eliminar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
