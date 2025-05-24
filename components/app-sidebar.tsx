@@ -11,7 +11,6 @@ import {
   Timer,
   User,
 } from "lucide-react"
-
 import { NavMain } from "@/components/nav-main"
 // import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
@@ -29,6 +28,9 @@ import Link from "next/link"
 import { useSidebarStore } from "@/stores/useToggleSidebarStore"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useUser } from "@clerk/nextjs"
 
 const data = {
   user: {
@@ -112,6 +114,21 @@ const data = {
         },
       ],
     },
+    {
+      title: "Usuarios",
+      url: "#",
+      icon: User,
+      items: [
+        {
+          title: "Ver",
+          url: "/users",
+        },
+        {
+          title: "Crear",
+          url: "/users/create-user",
+        },
+      ],
+    },
   ],
   navSecondary: [
     {
@@ -147,6 +164,8 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isOpen = useSidebarStore(state => state.isOpen);
   const [hydrated, setHydrated] = useState(false)
+  const { user } = useUser();
+  const userConvex = useQuery(api.functions.user.getUserByClerkId, { clerkUserId: user?.id as string });
 
   useEffect(() => {
     setHydrated(true)
@@ -186,7 +205,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={{
+    name: userConvex?.nombre as string,
+    email: userConvex?.correo as string,
+    avatar: user?.imageUrl as string,
+  }} />
       </SidebarFooter>
     </Sidebar>
   )
